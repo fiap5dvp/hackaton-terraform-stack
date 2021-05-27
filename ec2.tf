@@ -1,0 +1,39 @@
+# Specify the provider and access details
+resource "random_shuffle" "random_subnet" {
+  input        = [for s in data.aws_subnet.public : s.id]
+  result_count = 1
+}
+
+resource "aws_instance" "web" {
+  instance_type = "t2.micro"
+  ami           = lookup(var.aws_amis, var.aws_region)
+
+  count = 1
+
+  subnet_id              = random_shuffle.random_subnet.result[0]
+  vpc_security_group_ids = ["${aws_security_group.allow-ssh.id}"]
+  key_name               = var.KEY_NAME
+  iam_instance_profile   = aws_iam_instance_profile.ecr_readOnly_profile.name
+
+  provisioner "file" {
+    content     = data.template_file.script.rendered
+    destination = "$(pwd)/script.sh"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo chmod +x $(pwd)/script.sh",
+      "sudo bash $(pwd)/script.sh"
+    ]
+  }
+
+  connection {
+    user        = var.INSTANCE_USERNAME
+    private_key = file("${var.PATH_TO_KEY}")
+    host        = self.public_dns
+  }
+
+  tags = {
+    Name = "${format("nginx-hackaton-%03d", count.index + 1)}"
+  }
+}
