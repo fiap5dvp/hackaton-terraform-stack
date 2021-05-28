@@ -3,7 +3,7 @@ resource "aws_elb" "web" {
   name = "hackton-elb"
 
   subnets         = data.aws_subnet_ids.all.ids
-  security_groups = ["${aws_security_group.allow-ssh.id}"]
+  security_groups = [aws_security_group.allow-ssh.id]
 
   listener {
     instance_port     = 80
