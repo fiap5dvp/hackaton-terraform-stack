@@ -16,9 +16,9 @@ phases:
       - export 'TFVAR_VPC_ID="$VPC_ID"' 
   pre_build:
     commands:
-      - login=$(aws ecr get-login --region=us-east-1)
-      - login=$(echo $login | sed 's/-e none/ /g' | tee)
-      - echo $login | bash      
+    #  - login=$(aws ecr get-login --region=us-east-1)
+    #  - login=$(echo $login | sed 's/-e none/ /g' | tee)
+    #  - echo $login | bash      
   build:
     commands:
      # - ./terraform init 
