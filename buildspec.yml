@@ -6,12 +6,11 @@ phases:
     commands: 
       - apt-get update -y
       - apt-get install -y jq
-      - terraformImage="hashicorp/terraform:0.12.23"
+      - terraformImage="hashicorp/terraform:0.14.11"
       - docker pull $terraformImage
-      - PROJ_NAME="$PROJETCT_NAME"
-      - REPOSITORY_URI="$ECR_ADDRESS"
-      - mkdir .aws && echo $AWS_CREDENTIALS > .aws/credentials .aws/ && ECHO $AWS_CONFIG > .aws/config
-      - mkdir .ssh && echo $SSH_KEY > .ssh/fiap-lab.pem
+      - echo 'TFVAR_PROJ_NAME="$PROJECT_NAME"'> .env
+      - echo 'TFVAR_VPC_ID="$VPC_ID"' >> .env
+      - mkdir .aws && echo $AWS_CREDENTIALS > .aws/credentials
   pre_build:
     commands:
       - login=$(aws ecr get-login --region=us-east-1)
@@ -19,12 +18,12 @@ phases:
       - echo $login | bash      
   build:
     commands:
-      - dockerterraform="docker run --rm -w /app  -v $PWD:/app -v $PWD/.aws:/root/.aws -v $PWD/.ssh:/root/.ssh -e PROJ_NAME=$PROJ_NAME $terraformImage"
+      - dockerterraform="docker run --rm -w /app  -v $PWD:/app -v $PWD/.aws:/root/.aws -e --env-file=.env $terraformImage"
       - $dockerterraform init 
       - $dockerterraform workspace select $STAGE || $dockerterraform workspace new $STAGE
-      - $dockerterraform destroy -var ECR_REGISTRY="${REPOSITORY_URI}" -auto-approve
-      - $dockerterraform plan -var ECR_REGISTRY="${REPOSITORY_URI}" -out plan.out
-      - $dockerterraform apply -var ECR_REGISTRY="${REPOSITORY_URI}" -auto-approve
+      - $dockerterraform destroy  -auto-approve
+      - $dockerterraform plan  -out plan.out
+      - $dockerterraform apply  -auto-approve
       - elb=$($dockerterraform output elb_public)
       - echo $elb >> elb.txt
   post_build:

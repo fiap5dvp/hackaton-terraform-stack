@@ -14,10 +14,11 @@ terraform {
 
 
 module "deploy_python" {
-  source        = "./deploy"
-  ECR_REGISTRY  = "129824431449.dkr.ecr.us-east-1.amazonaws.com/hackaton"
-  NUM_INSTANCES = 1
-  APP           = "web"
-  VPC_ID        = "vpc-3e139844"
-  PROJECT_NAME  = "hackaton"
+  source       = "./deploy"
+  VPC_ID       = "vpc-3e139844"
+  PROJECT_NAME = "hackaton"
+}
+
+output "elb-dns" {
+  value = module.deploy_python.elb_public
 }
