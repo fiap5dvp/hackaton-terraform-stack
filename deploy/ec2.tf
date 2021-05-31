@@ -16,6 +16,6 @@ resource "aws_instance" "web" {
   user_data              = data.template_file.user_data.rendered
 
   tags = {
-    Name = "${var.APP}-ec2-${terraform.workspace}-${format("%02d", count.index + 1)}"
+    Name = "${var.PROJECT_NAME}-ec2-${terraform.workspace}-${format("%02d", count.index + 1)}"
   }
 }

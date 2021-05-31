@@ -1,6 +1,6 @@
 
 resource "aws_elb" "web" {
-  name = "hackton-elb"
+  name = "${terraform.workspace}-${var.PROJECT_NAME}-elb"
 
   subnets         = data.aws_subnet_ids.all.ids
   security_groups = [aws_security_group.allow-ssh.id]
