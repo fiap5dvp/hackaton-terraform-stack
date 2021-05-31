@@ -19,13 +19,13 @@ phases:
       - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET
       - export AWS_REGION=us-east-1
       - export AWS_OUTPUT=json
-      - export TFVAR_PROJECT_NAME=$PROJECT_NAME
-      - export TFVAR_VPC_ID=$VPC_ID
+      - export TF_VAR_PROJECT_NAME=$PROJECT_NAME
+      - export TF_VAR_VPC_ID=$VPC_ID
       - export BRANCH=main
       - cd deploy
       - ../terraform init 
       - ../terraform workspace select $BRANCH || ../terraform workspace new $BRANCH
-      - ../terraform destroy  -auto-approve
+      - ../terraform destroy -auto-approve
       - ../terraform plan  -out plan.out
       - ../terraform apply  -auto-approve
       - elb=$(../terraform output elb_public)
