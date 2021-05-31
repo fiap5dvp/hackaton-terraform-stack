@@ -5,6 +5,7 @@ data "template_file" "user_data" {
     USER_NAME      = var.INSTANCE_USERNAME
     PROJECT_NAME   = var.PROJECT_NAME
     CONTAINER_PORT = var.CONTAINER_PORT
+    ENV            = terraform.workspace
   }
 }
 
@@ -25,7 +26,7 @@ data "aws_subnet_ids" "all" {
 }
 
 data "aws_ecr_repository" "repository" {
-  name = var.PROJECT_NAME
+  name = "${terraform.workspace}-${var.PROJECT_NAME}"
 }
 
 data "aws_subnet" "public" {

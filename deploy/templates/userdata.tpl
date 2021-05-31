@@ -9,7 +9,7 @@ login=$(aws ecr get-login --region=us-east-1)
 login=$(echo $login | sed 's/-e none/ /g' | tee)
 echo $login | bash
 
-TAG=$(aws ecr describe-images --region=us-east-1 --output json --repository-name ${PROJECT_NAME} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' --output=text)
+TAG=$(aws ecr describe-images --region=us-east-1 --output json --repository-name ${ENV}-${PROJECT_NAME} --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags[0]' --output=text)
 dockerImage=${REPO_URL}:"$TAG"
 docker pull $dockerImage
 
