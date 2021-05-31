@@ -33,8 +33,3 @@ phases:
   post_build:
     commands:
       - echo "DONE!!!!"
-    
-artifacts:
-  files: 
-    - elb.txt
-    - plan.out
