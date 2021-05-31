@@ -21,3 +21,7 @@ variable "NUM_INSTANCES" {
 variable "VPC_ID" {}
 
 variable "PROJECT_NAME" {}
+
+variable "name" {
+  default = "5dvp-terraform-grp4"
+}
