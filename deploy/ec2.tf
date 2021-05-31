@@ -5,40 +5,17 @@ resource "random_shuffle" "random_subnet" {
 }
 
 resource "aws_instance" "web" {
-  instance_type = var.instance_type
+  instance_type = var.INSTANCE_TYPE
   ami           = data.aws_ami.ami.id
-  count         = var.num_instances
+  count         = var.NUM_INSTANCES
 
   subnet_id              = random_shuffle.random_subnet.result[0]
   vpc_security_group_ids = [aws_security_group.allow-ssh.id]
   key_name               = var.KEY_NAME
   iam_instance_profile   = aws_iam_instance_profile.ecr_readOnly_profile.name
-
-
-  provisioner "file" {
-    content     = data.template_file.script.rendered
-    destination = "$(pwd)/script.sh"
-  }
-
-  provisioner "file" {
-    content     = data.template_file.docker_compose.rendered
-    destination = "$(pwd)/docker-compose.yml"
-  }
-
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo bash $(pwd)/script.sh"
-    ]
-  }
-
-  connection {
-    user        = var.INSTANCE_USERNAME
-    private_key = file(var.PATH_TO_KEY)
-    host        = self.public_dns
-  }
+  user_data              = data.template_file.user_data.rendered
 
   tags = {
-    Name = "${var.app}-ec2-${terraform.workspace}-${format("%02d", count.index + 1)}"
+    Name = "${var.APP}-ec2-${terraform.workspace}-${format("%02d", count.index + 1)}"
   }
 }

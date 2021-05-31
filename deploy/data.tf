@@ -1,10 +1,19 @@
-data "template_file" "script" {
-  template = file("${path.module}/templates/script.tpl")
+data "template_file" "user_data" {
+  template = file("${path.module}/templates/userdata.tpl")
+  vars = {
+    REPO_URL       = var.ECR_REGISTRY
+    USER_NAME      = var.INSTANCE_USERNAME
+    PROJECT_NAME   = var.PROJECT_NAME
+    CONTAINER_PORT = var.CONTAINER_PORT
+  }
 }
 
 data "aws_vpc" "vpc" {
-  id = var.vpc_id
+  id = var.VPC_ID
+}
 
+data "http" "myip" {
+  url = "http://ipv4.icanhazip.com"
 }
 
 data "aws_subnet_ids" "all" {
@@ -34,21 +43,4 @@ data "aws_ami" "ami" {
   }
 
   owners = ["591542846629"] # Amazon
-}
-
-data "external" "last_tag" {
-  program = [
-    "aws", "ecr", "describe-images",
-    "--repository-name", var.project,
-    "--query", "{\"tags\": to_string(sort_by(imageDetails,& imagePushedAt)[-1].imageTags)}",
-  ]
-}
-
-data "template_file" "docker_compose" {
-  template = file("${path.module}/templates/docker-compose.tpl")
-
-  vars = {
-    REPO_URL = var.ECR_REGISTRY
-    TAG      = data.external.last_tag.result.tags
-  }
 }
