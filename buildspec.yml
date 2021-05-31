@@ -5,15 +5,15 @@ phases:
       docker: 18
     commands: 
       - apt-get update -y
-      - apt-get install -y jq
-      - terraformImage="hashicorp/terraform:0.14.11"
-      - docker pull $terraformImage
-      - echo 'AWS_ACCESS_KEY_ID="$AWS_KEY"'> .env
-      - echo 'AWS_SECRET_ACCESS_KEY="$AWS_SECRET"' >>.env
-      - echo 'AWS_REGION=us-east-1' >> .env
-      - echo 'AWS_OUTPUT=json'>> .env
-      - echo 'TFVAR_PROJ_NAME="$PROJECT_NAME"'>> .env
-      - echo 'TFVAR_VPC_ID="$VPC_ID"' >> .env
+      - apt-get install -y jq wget unzip
+      - wget https://releases.hashicorp.com/terraform/0.14.11/terraform_0.14.11_linux_amd64.zip
+      - unzip terraform_0.14.11_linux_amd64.zip
+      - export 'AWS_ACCESS_KEY_ID="$AWS_KEY"'
+      - export 'AWS_SECRET_ACCESS_KEY="$AWS_SECRET"'
+      - export 'AWS_REGION=us-east-1'
+      - export 'AWS_OUTPUT=json'
+      - export 'TFVAR_PROJECT_NAME="$PROJECT_NAME"'
+      - export 'TFVAR_VPC_ID="$VPC_ID"' 
   pre_build:
     commands:
       - login=$(aws ecr get-login --region=us-east-1)
@@ -21,18 +21,17 @@ phases:
       - echo $login | bash      
   build:
     commands:
-      - dockerterraform="docker run --rm -w /app  -v $PWD/deploy:/app --env-file=.env $terraformImage"
-      - $dockerterraform init 
+      - ./terraform init 
       - echo "CODEBUILD_WEBHOOK_HEAD_REF=$CODEBUILD_WEBHOOK_HEAD_REF"
       - echo "CODEBUILD_WEBHOOK_BASE_REF=$CODEBUILD_WEBHOOK_BASE_REF"
       - echo "CODEBUILD_WEBHOOK_MERGE_COMMIT=$CODEBUILD_WEBHOOK_MERGE_COMMIT"
       - echo "CODEBUILD_WEBHOOK_TRIGGER=$CODEBUILD_WEBHOOK_TRIGGER"
       - echo "CODEBUILD_SOURCE_VERSION=$CODEBUILD_SOURCE_VERSION"
-      #- $dockerterraform workspace select $CODEBUILD_WEBHOOK_HEAD_REF || $dockerterraform workspace new $CODEBUILD_WEBHOOK_HEAD_REF
-      - $dockerterraform destroy  -auto-approve
-      - $dockerterraform plan  -out plan.out
-      - $dockerterraform apply  -auto-approve
-      - elb=$($dockerterraform output elb_public)
+      #- ./terraform workspace select $CODEBUILD_WEBHOOK_HEAD_REF || ./terraform workspace new $CODEBUILD_WEBHOOK_HEAD_REF
+      - ./terraform destroy  -auto-approve
+      - ./terraform plan  -out plan.out
+      - ./terraform apply  -auto-approve
+      - elb=$(./terraform output elb_public)
       - echo $elb >> elb.txt
   post_build:
     commands:
