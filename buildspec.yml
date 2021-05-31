@@ -24,11 +24,11 @@ phases:
       - export BRANCH=main
       - cd deploy
       - ../terraform init 
-      - ../terraform workspace select $BRANCH || ./terraform workspace new $BRANCH
+      - ../terraform workspace select $BRANCH || ../terraform workspace new $BRANCH
       - ../terraform destroy  -auto-approve
       - ../terraform plan  -out plan.out
       - ../terraform apply  -auto-approve
-      - elb=$(./terraform output elb_public)
+      - elb=$(../terraform output elb_public)
       - echo $elb >> elb.txt
   post_build:
     commands:
