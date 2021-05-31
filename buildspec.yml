@@ -8,12 +8,6 @@ phases:
       - apt-get install -y jq wget unzip
       - wget https://releases.hashicorp.com/terraform/0.14.11/terraform_0.14.11_linux_amd64.zip
       - unzip terraform_0.14.11_linux_amd64.zip
-      - export 'AWS_ACCESS_KEY_ID=${AWS_KEY}'
-      - export 'AWS_SECRET_ACCESS_KEY=${AWS_SECRET}'
-      - export 'AWS_REGION=us-east-1'
-      - export 'AWS_OUTPUT=json'
-      - export 'TFVAR_PROJECT_NAME=${PROJECT_NAME}'
-      - export 'TFVAR_VPC_ID=${VPC_ID}'
   pre_build:
     commands:
     #  - login=$(aws ecr get-login --region=us-east-1)
@@ -21,19 +15,20 @@ phases:
     #  - echo $login | bash      
   build:
     commands:
+      - export AWS_ACCESS_KEY_ID=${AWS_KEY}
+      - export AWS_SECRET_ACCESS_KEY=${AWS_SECRET
+      - export AWS_REGION=us-east-1
+      - export AWS_OUTPUT=json
+      - export TFVAR_PROJECT_NAME=${PROJECT_NAME}
+      - export TFVAR_VPC_ID=${VPC_ID}
       - cd deploy
-     # - ./terraform init 
-      - echo "CODEBUILD_WEBHOOK_HEAD=$CODEBUILD_WEBHOOK_HEAD_REF"
-      - echo "CODEBUILD_WEBHOOK_BASE=$CODEBUILD_WEBHOOK_BASE_REF"
-      - echo "CODEBUILD_WEBHOOK_MERGE=$CODEBUILD_WEBHOOK_MERGE_COMMIT"
-      - echo "CODEBUILD_WB_TRIGGER=$CODEBUILD_WEBHOOK_TRIGGER"
-      - echo "CODEBUILD_SRC_VERSION=$CODEBUILD_SOURCE_VERSION"
-      #- ./terraform workspace select $CODEBUILD_WEBHOOK_HEAD_REF || ./terraform workspace new $CODEBUILD_WEBHOOK_HEAD_REF
-      #- ./terraform destroy  -auto-approve
-      #- ./terraform plan  -out plan.out
-      #- ./terraform apply  -auto-approve
-      #- elb=$(./terraform output elb_public)
-      #- echo $elb >> elb.txt
+      - ../.terraform init 
+      - ../.terraform workspace select $CODEBUILD_WEBHOOK_HEAD_REF || ./terraform workspace new $BRANCH
+      - ../.terraform destroy  -auto-approve
+      - ../.terraform plan  -out plan.out
+      - ../.terraform apply  -auto-approve
+      - elb=$(./terraform output elb_public)
+      - echo $elb >> elb.txt
   post_build:
     commands:
       - echo "DONE!!!!"
